@@ -1,4 +1,4 @@
-name: Nuclei DAST Scan
+name: OWASP ZAP DAST Scan
 
 on:
   workflow_dispatch:
@@ -6,36 +6,29 @@ on:
     branches: ["main"]
 
 jobs:
-  nuclei_scan:
+  zap_scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Nuclei
+      - name: Install OWASP ZAP
         run: |
-          curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest \
-            | grep "browser_download_url.*linux_amd64.zip" \
-            | cut -d : -f 2,3 \
-            | tr -d \" \
-            | wget -qi -
-          unzip -o nuclei_*_linux_amd64.zip
-          sudo mv nuclei /usr/local/bin/
-          nuclei --version
+          sudo apt-get update
+          sudo apt-get install -y zaproxy
 
       - name: Set Target URL from Secrets
-        run: echo "Running Nuclei scan on $TARGET_URL"
+        run: echo "Running OWASP ZAP scan on $TARGET_URL"
         env:
           TARGET_URL: ${{ secrets.ZAP_TARGET_URL }}
 
-      - name: Run Nuclei Scan
+      - name: Run OWASP ZAP DAST Scan
         run: |
-          mkdir -p reports
-          nuclei -u ${{ secrets.ZAP_TARGET_URL }} -o reports/nuclei-report.txt
+          zap-cli quick-scan --self-contained --start-url ${{ secrets.ZAP_TARGET_URL }} --output-file zap-report.html
 
-      - name: Upload Report as Artifact
+      - name: Upload OWASP ZAP Report as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nuclei-report
-          path: reports/nuclei-report.txt
+          name: zap-report
+          path: zap-report.html
