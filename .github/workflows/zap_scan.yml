@@ -13,10 +13,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install OWASP ZAP
+      - name: Install Dependencies and Add ZAP PPA
         run: |
           sudo apt-get update
-          sudo apt-get install -y zaproxy
+          sudo apt-get install -y openjdk-11-jdk
+          sudo apt-get install -y wget
+          wget -q -O - https://github.com/zaproxy/zaproxy/releases/download/v2.11.1/ZAP_2.11.1_Linux.tar.gz | tar -xz
+          sudo mv ZAP_2.11.1 /opt/zaproxy
+          sudo ln -s /opt/zaproxy/zap.sh /usr/local/bin/zap
 
       - name: Create a custom directory for ZAP reports
         run: |
@@ -25,6 +29,7 @@ jobs:
 
       - name: Run OWASP ZAP Scan
         run: |
+          /opt/zaproxy/zap.sh -daemon -port 8080 &
           zap-baseline.py -t ${{ secrets.ZAP_TARGET_URL }} -J ${{ github.workspace }}/zap-reports/report_json.json -w ${{ github.workspace }}/zap-reports/report_md.md -r ${{ github.workspace }}/zap-reports/report_html.html -a -T 5 -m 5
 
       - name: Set permissions for the generated reports
