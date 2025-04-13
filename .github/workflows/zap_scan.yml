@@ -13,19 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Create a custom directory for ZAP reports
+        run: mkdir -p ${{ github.workspace }}/zap-reports
+
       - name: Run OWASP ZAP Scan
         uses: zaproxy/action-baseline@v0.10.0
         with:
           target: ${{ secrets.ZAP_TARGET_URL }}
           cmd_options: "-a -T 5 -m 5" # Aggressive scan, timeout, max alerts
+          report_dir: ${{ github.workspace }}/zap-reports
 
-      - name: Create directory for scan reports
-        run: mkdir -p zap-reports
-
-      - name: Move report to zap-reports folder
-        run: mv owasp-zap-report.html zap-reports/
-
-      - name: Commit and push report to GitHub
+      - name: Commit and push the ZAP report to the repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
