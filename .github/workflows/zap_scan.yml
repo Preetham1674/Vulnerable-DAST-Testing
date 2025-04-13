@@ -1,4 +1,4 @@
-name: OWASP ZAP DAST Scan
+name: Wapiti DAST Scan
 
 on:
   workflow_dispatch:
@@ -6,29 +6,30 @@ on:
     branches: ["main"]
 
 jobs:
-  zap_scan:
+  wapiti_scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install OWASP ZAP
+      - name: Install Wapiti
         run: |
           sudo apt-get update
-          sudo apt-get install -y zaproxy
+          sudo apt-get install -y wapiti
 
       - name: Set Target URL from Secrets
-        run: echo "Running OWASP ZAP scan on $TARGET_URL"
+        run: echo "Running Wapiti scan on $TARGET_URL"
         env:
           TARGET_URL: ${{ secrets.ZAP_TARGET_URL }}
 
-      - name: Run OWASP ZAP DAST Scan
+      - name: Run Wapiti Scan
         run: |
-          zap-cli quick-scan --self-contained --start-url ${{ secrets.ZAP_TARGET_URL }} --output-file zap-report.html
+          mkdir -p reports
+          wapiti -u ${{ secrets.ZAP_TARGET_URL }} -o reports/wapiti-report.html
 
-      - name: Upload OWASP ZAP Report as Artifact
+      - name: Upload Report as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zap-report
-          path: zap-report.html
+          name: wapiti-report
+          path: reports/wapiti-report.html
