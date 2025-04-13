@@ -1,7 +1,7 @@
 name: OWASP ZAP Scan
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger
   push:
     branches: ["main"]
 
@@ -9,26 +9,26 @@ jobs:
   zap_scan:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      actions: read # optional
-      security-events: write # optional
-      issues: none # 🚫 disable issue creation to avoid the error
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Run OWASP ZAP Baseline Scan
+      - name: Run OWASP ZAP Scan
         uses: zaproxy/action-baseline@v0.10.0
         with:
           target: ${{ secrets.ZAP_TARGET_URL }}
-          cmd_options: "-a -T 5 -m 5"
-          fail_action: false # don't fail even if issues found
-          allow_issue_writing: false # 🚫 prevent GitHub issue creation
+          cmd_options: "-a -T 5 -m 5" # Aggressive scan, timeout, max alerts
 
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: owasp-zap-report.html
+      - name: Create directory for scan reports
+        run: mkdir -p zap-reports
+
+      - name: Move report to zap-reports folder
+        run: mv owasp-zap-report.html zap-reports/
+
+      - name: Commit and push report to GitHub
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add zap-reports/owasp-zap-report.html
+          git commit -m "Add ZAP scan report"
+          git push
