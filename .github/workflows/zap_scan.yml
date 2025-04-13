@@ -1,4 +1,4 @@
-name: Burp Suite DAST Scan
+name: Nikto DAST Scan
 
 on:
   workflow_dispatch:
@@ -6,22 +6,28 @@ on:
     branches: ["main"]
 
 jobs:
-  burp_scan:
+  nikto_scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Trigger Burp Suite Scan (via API)
+      - name: Install Nikto
         run: |
-          curl -X POST "https://your-burp-api-endpoint" -d '{"scanTarget": "http://your-app-url"}'
+          sudo apt-get update
+          sudo apt-get install -y nikto
 
-      - name: Fetch and store Burp report
+      - name: Run Nikto Scan
         run: |
-          curl -X GET "https://your-burp-api-endpoint/reports" -o burp_report.html
+          nikto -h http://your-app-url -o nikto-report.html
 
-      - name: Commit and Push Burp Report
+      - name: Upload Nikto Report
+        run: |
+          mkdir -p ${{ github.workspace }}/reports
+          mv nikto-report.html ${{ github.workspace }}/reports/
+
+      - name: Commit and Push Report
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -29,6 +35,6 @@ jobs:
           # Set up authentication with the GITHUB_TOKEN
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
-          git add burp_report.html
-          git commit -m "Add Burp Suite scan report"
+          git add reports/
+          git commit -m "Add Nikto scan report"
           git push
