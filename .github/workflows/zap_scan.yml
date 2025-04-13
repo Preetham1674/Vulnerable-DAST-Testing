@@ -27,14 +27,14 @@ jobs:
           mkdir -p ${{ github.workspace }}/reports
           mv nikto-report.html ${{ github.workspace }}/reports/
 
-          - name: Commit and Push Report
-          run: |
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Commit and Push Report
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Set the remote URL using GITHUB_TOKEN for authentication
-            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          # Set the remote URL using GITHUB_TOKEN for authentication
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
-            git add reports/
-            git commit -m "Add Nikto scan report"
-            git push
+          git add reports/
+          git commit -m "Add Nikto scan report"
+          git push
