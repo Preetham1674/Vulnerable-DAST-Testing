@@ -1,4 +1,4 @@
-name: OWASP ZAP Baseline Scan
+name: OWASP ZAP DAST Scan
 
 on:
   workflow_dispatch:
@@ -13,24 +13,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Java
+      - name: Install Java (ZAP needs it)
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Download ZAP Baseline Scan
+      - name: Install Python dependencies
         run: |
-          wget https://github.com/zaproxy/zaproxy/releases/download/v2.15.0/ZAP_2.15.0_unix.sh -O zap.sh
-          chmod +x zap.sh
-          ./zap.sh -q -dir zap
+          sudo apt update
+          sudo apt install -y python3 python3-pip unzip
+
+      - name: Download and unzip ZAP
+        run: |
+          wget https://github.com/zaproxy/zaproxy/releases/download/v2.16.0/ZAP_2.16.0_unix.zip -O zap.zip
+          unzip zap.zip -d zap
 
       - name: Run ZAP Baseline Scan
         run: |
-          ./zap/zap.sh -cmd -quickurl "${{ secrets.ZAP_TARGET_URL }}" -quickout report.html -quickprogress -silent
+          python3 zap/zap-baseline.py -t "${{ secrets.ZAP_TARGET_URL }}" -r zap-report.html -J zap-report.json
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: report.html
+          path: |
+            zap-report.html
+            zap-report.json
