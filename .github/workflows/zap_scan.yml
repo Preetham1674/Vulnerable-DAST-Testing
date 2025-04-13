@@ -1,71 +1,34 @@
-name: DAST Scan and Report
+name: Burp Suite DAST Scan
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: ["main"]
 
 jobs:
-  dast-scan:
+  burp_scan:
     runs-on: ubuntu-latest
+
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js (for your vulnerable app)
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "16"
-
-      # Step 3: Install dependencies for the vulnerable app (adjust to your app)
-      - name: Install Dependencies
+      - name: Trigger Burp Suite Scan (via API)
         run: |
-          cd vulnerable-app
-          npm install
+          curl -X POST "https://your-burp-api-endpoint" -d '{"scanTarget": "http://your-app-url"}'
 
-      # Step 4: Run the application (adjust this to your app start command)
-      - name: Start Application
+      - name: Fetch and store Burp report
         run: |
-          cd vulnerable-app
-          nohup npm start &  # Starts the app in the background
+          curl -X GET "https://your-burp-api-endpoint/reports" -o burp_report.html
 
-      # Step 5: Run OWASP ZAP DAST Scan
-      - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.10.0
-        with:
-          target: http://localhost:3000 # Adjust to your app's URL
-        continue-on-error: true # In case the scan encounters issues
-
-      # Step 6: Generate Nikto scan report (if needed for additional scanning)
-      - name: Run Nikto Scan
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          name: nikto-report.html
-          path: reports/
-
-      # Step 7: Commit and Push Reports Back to the Repository
-      - name: Commit and Push Reports
+      - name: Commit and Push Burp Report
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Use GITHUB_TOKEN for authentication to push the changes
+          # Set up authentication with the GITHUB_TOKEN
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
-          git add reports/
-          git commit -m "Add Nikto and ZAP scan reports"
+          git add burp_report.html
+          git commit -m "Add Burp Suite scan report"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Step 8: Optionally, upload reports as artifacts (if needed)
-      - name: Upload Reports as Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: zap-nikto-reports
-          path: reports/
