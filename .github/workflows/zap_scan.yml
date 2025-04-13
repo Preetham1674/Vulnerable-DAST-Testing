@@ -1,36 +1,36 @@
-name: OWASP ZAP DAST Scan
+# name: OWASP ZAP DAST Scan
 
-on:
-  workflow_dispatch:
-  push:
-    branches: ["main"]
+# on:
+#   workflow_dispatch:
+#   push:
+#     branches: ["main"]
 
-jobs:
-  zap_scan:
-    runs-on: ubuntu-latest
+# jobs:
+#   zap_scan:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Install Java (ZAP CLI needs it)
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: "17"
+#       - name: Install Java (ZAP CLI needs it)
+#         uses: actions/setup-java@v3
+#         with:
+#           distribution: "temurin"
+#           java-version: "17"
 
-      - name: Download and extract ZAP
-        run: |
-          wget https://github.com/zaproxy/zaproxy/releases/latest/download/ZAP_WEEKLY_D-2024-04-08.zip -O zap.zip
-          unzip zap.zip -d zap
-          chmod +x zap/zap.sh
+#       - name: Download and extract ZAP
+#         run: |
+#           wget https://github.com/zaproxy/zaproxy/releases/latest/download/ZAP_WEEKLY_D-2024-04-08.zip -O zap.zip
+#           unzip zap.zip -d zap
+#           chmod +x zap/zap.sh
 
-      - name: Run ZAP Baseline Scan
-        run: |
-          zap/zap.sh -cmd -quickurl "${{ secrets.ZAP_TARGET_URL }}" -quickout report.html -quickprogress -silent
+#       - name: Run ZAP Baseline Scan
+#         run: |
+#           zap/zap.sh -cmd -quickurl "${{ secrets.ZAP_TARGET_URL }}" -quickout report.html -quickprogress -silent
 
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: report.html
+#       - name: Upload ZAP Report
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: zap-report
+#           path: report.html
