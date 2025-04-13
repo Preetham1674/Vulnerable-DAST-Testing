@@ -1,4 +1,4 @@
-name: OWASP ZAP Scan
+name: OWASP ZAP Scan Without Docker
 
 on:
   workflow_dispatch: # Manual trigger
@@ -13,24 +13,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install OWASP ZAP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zaproxy
+
       - name: Create a custom directory for ZAP reports
-        run: mkdir -p ${{ github.workspace }}/zap-reports
+        run: |
+          mkdir -p ${{ github.workspace }}/zap-reports
+          chmod -R 777 ${{ github.workspace }}/zap-reports  # Set permissions for the reports folder
 
       - name: Run OWASP ZAP Scan
-        uses: zaproxy/action-baseline@v0.10.0
-        with:
-          target: ${{ secrets.ZAP_TARGET_URL }}
-          cmd_options: "-a -T 5 -m 5" # Aggressive scan, timeout, max alerts
-        # Store the results in the 'zap-reports' directory
-        env:
-          ZAP_REPORT_JSON: ${{ github.workspace }}/zap-reports/report_json.json
-          ZAP_REPORT_MD: ${{ github.workspace }}/zap-reports/report_md.md
-          ZAP_REPORT_HTML: ${{ github.workspace }}/zap-reports/report_html.html
+        run: |
+          zap-baseline.py -t ${{ secrets.ZAP_TARGET_URL }} -J ${{ github.workspace }}/zap-reports/report_json.json -w ${{ github.workspace }}/zap-reports/report_md.md -r ${{ github.workspace }}/zap-reports/report_html.html -a -T 5 -m 5
+
+      - name: Set permissions for the generated reports
+        run: |
+          chmod -R 777 ${{ github.workspace }}/zap-reports  # Ensure generated reports are accessible
 
       - name: Commit and push the ZAP report to the repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add zap-reports/*
+          git add zap-reports/
           git commit -m "Add ZAP scan report"
           git push
