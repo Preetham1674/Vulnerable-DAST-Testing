@@ -1,10 +1,10 @@
-# 🚨 Vulnerable SAST Testing – Secure CI/CD Pipeline with SonarQube
+# 🕷️ Vulnerable DAST Testing – Secure CI/CD Pipeline with OWASP ZAP
 
-This project demonstrates a secure CI/CD pipeline that integrates **Static Application Security Testing (SAST)** using **SonarQube** on a custom-built intentionally vulnerable Node.js application.
+This project showcases a **Dynamic Application Security Testing (DAST)** pipeline using **OWASP ZAP**, GitHub Actions, and a custom Node.js app to simulate runtime web vulnerabilities in a DevSecOps environment.
 
 ## 🧾 Description
 
-A simplified Express-based web application with intentional coding flaws was developed to simulate real-world vulnerabilities. The source code is analyzed through SonarQube integrated into a GitHub Actions CI pipeline. This promotes **shift-left security** by identifying issues early in the development lifecycle.
+A vulnerable Express.js application is exposed temporarily to the public internet using `ngrok`. OWASP ZAP scans this live app for security vulnerabilities like XSS, SQLi, and misconfigurations. The scan is triggered automatically via GitHub Actions and reports are generated in HTML/JSON format.
 
 ## 🧰 Tech Stack
 
@@ -12,43 +12,44 @@ A simplified Express-based web application with intentional coding flaws was dev
 |----------------|--------------------------|
 | Language        | JavaScript (Node.js), HTML |
 | CI/CD Platform  | GitHub Actions            |
-| Security Tool   | SonarQube (SAST)          |
+| Security Tool   | OWASP ZAP (DAST)          |
+| Tunneling Tool  | ngrok                     |
 | Backend         | Express.js                |
 | OS              | Windows                   |
 | Version Control | Git, GitHub               |
 
 ## 🔧 Tools Used
 
-- **SonarQube**: For static code vulnerability scanning.
-- **GitHub Actions**: Automates SAST scans during code commits.
-- **Node.js + Express**: Custom-built vulnerable app for testing.
-- **NPM Modules**: body-parser, express, path, etc.
+- **OWASP ZAP**: For DAST (Dynamic) web vulnerability scanning.
+- **ngrok**: Exposes localhost app to ZAP scanner hosted externally.
+- **GitHub Actions**: Runs OWASP ZAP scan automatically.
+- **Node.js + Express**: Vulnerable web application.
 
-## 🚀 Pipeline Flow
+## ⚙️ Workflow Overview
 
-1. Developer pushes code to GitHub.
-2. GitHub Actions triggers the pipeline.
-3. Source code is analyzed using SonarQube Scanner CLI.
-4. Vulnerability report is generated and viewable in the SonarQube dashboard.
+1. Local Node.js server is started.
+2. Exposed to the internet using `ngrok`.
+3. GitHub Action triggers ZAP scan on the ngrok URL.
+4. DAST scan results are saved and available for review.
 
-## 📜 How to Run Locally
+## 📜 How to Use
 
-1. Install and run SonarQube on localhost.
-2. Clone this repo.
-3. Setup GitHub Actions with proper token and Sonar config.
-4. Push to main branch or dispatch manually.
+1. Start your Node.js app on `localhost:3000`.
+2. Run `ngrok http 3000` and note the public URL.
+3. Replace the target URL in `.github/workflows/zap_scan.yml`.
+4. Push the code or trigger the GitHub Action manually.
+5. View the HTML report from the ZAP output.
 
-## 📄 Reports
+## 🧪 Reports
 
-Vulnerability reports are automatically generated in the SonarQube interface after every commit.
-
----
+- DAST scan outputs HTML and JSON reports
+- Lists high/medium/low vulnerabilities with attack vectors
 
 ## 📌 Key Features
 
-- Automated SAST scans using GitHub Actions
-- Detects code smells, bugs, vulnerabilities
-- Promotes DevSecOps and shift-left testing
+- End-to-end automated DAST scanning
+- Explores real attack vectors like XSS, CSRF, and SQLi
+- Promotes runtime vulnerability detection
 
 ## 👨‍💻 Author
 
