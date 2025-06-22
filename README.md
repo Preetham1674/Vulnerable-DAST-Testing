@@ -31,10 +31,6 @@ A simplified Express-based web application with intentional coding flaws was dev
 3. Source code is analyzed using SonarQube Scanner CLI.
 4. Vulnerability report is generated and viewable in the SonarQube dashboard.
 
-## 📸 Screenshot (Sample)
-
-> ![SonarQube Dashboard Screenshot](link-if-you-have-one)
-
 ## 📜 How to Run Locally
 
 1. Install and run SonarQube on localhost.
